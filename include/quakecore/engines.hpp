@@ -17,7 +17,8 @@ TraversalStats RunBaselineTraversal(const BspData& bsp, const std::vector<Camera
 TraversalStats RunCpuOptimizedTraversal(const BspData& bsp, const std::vector<Camera>& cameras, int threads);
 
 /**
- * CUDA optimized traversal (or runtime fallback if CUDA disabled).
+ * CUDA optimized traversal.
+ * Requires CUDA toolchain and runtime support at build/run time.
  */
 TraversalStats RunGpuOptimizedTraversal(const BspData& bsp, const std::vector<Camera>& cameras, int block_size);
 

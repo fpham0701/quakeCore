@@ -1,10 +1,6 @@
 # Build artifacts
-build/
-cmake-build-*/
-CMakeFiles/
-CMakeCache.txt
+build/*
 compile_commands.json
-Makefile
 Testing/
 
 # Editor/OS
