@@ -20,5 +20,9 @@ Testing/
 *.json
 *.tmp
 
+# Downloaded example maps (generated on demand)
+examples/maps/.cache/
+examples/maps/fetched/
+
 # Slurm outputs
 slurm-*.out
