@@ -64,3 +64,6 @@ target_link_libraries(quakecore_cpu_opt PRIVATE quakecore_engines quakecore_core
 
 add_executable(quakecore_gpu_opt src/apps/gpu_opt_main.cpp)
 target_link_libraries(quakecore_gpu_opt PRIVATE quakecore_engines quakecore_core quakecore_io)
+
+add_executable(quakecore_bench src/apps/bench_main.cpp)
+target_link_libraries(quakecore_bench PRIVATE quakecore_engines quakecore_core quakecore_io)
