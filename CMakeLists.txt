@@ -36,7 +36,9 @@ if(QUAKECORE_BUILD_CPU_OPT OR QUAKECORE_BUILD_BENCH)
 endif()
 
 if(QUAKECORE_ENABLE_AVX2 AND (QUAKECORE_BUILD_CPU_OPT OR QUAKECORE_BUILD_BENCH))
-  target_compile_options(quakecore_cpu_engine PRIVATE -mavx2)
+  target_compile_options(quakecore_cpu_engine PRIVATE
+    -O3 -mavx2 -mfma -funroll-loops
+  )
 endif()
 
 if(QUAKECORE_ENABLE_OPENMP AND (QUAKECORE_BUILD_CPU_OPT OR QUAKECORE_BUILD_BENCH))
