@@ -271,7 +271,7 @@ TraversalStats RunCpuOptimizedTraversal(const BspData& bsp, const std::vector<Ca
       { soa = BuildNodeSoA(bsp); }
       // Implicit barrier: all threads are now warm and soa is ready.
 
-#pragma omp for schedule(static) nowait
+#pragma omp for schedule(dynamic, 8) nowait
       for (size_t i = 0; i < cameras.size(); ++i) {
         const auto s = TraverseCamera(bsp, soa, cameras[i]);
         visited_nodes  += s.visited_nodes;
