@@ -24,12 +24,14 @@ inline BenchmarkConfig ParseArgs(const int argc, char** argv) {
       cfg.threads = std::stoi(argv[++i]);
     } else if (a == "--block-size" && i + 1 < argc) {
       cfg.gpu_block_size = std::stoi(argv[++i]);
+    } else if (a == "--views-per-frame" && i + 1 < argc) {
+      cfg.views_per_frame = std::stoi(argv[++i]);
     } else if (a == "--seed" && i + 1 < argc) {
       cfg.seed = static_cast<uint64_t>(std::stoull(argv[++i]));
     } else if (a == "--csv" && i + 1 < argc) {
       (void)argv[++i];
     } else if (a == "--help") {
-      std::cout << "Usage: --map <file.bsp> [--frames N] [--threads N] [--block-size N] [--seed N] [--csv out.csv]\n";
+      std::cout << "Usage: --map <file.bsp> [--frames N] [--threads N] [--block-size N] [--views-per-frame K] [--seed N] [--csv out.csv]\n";
       std::exit(0);
     } else {
       throw std::runtime_error("Unknown or incomplete argument: " + a);

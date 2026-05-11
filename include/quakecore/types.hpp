@@ -77,6 +77,7 @@ struct BenchmarkConfig {
   uint64_t seed{12345};
   int threads{1};
   int gpu_block_size{256};
+  int views_per_frame{1};
 };
 
 }  // namespace quakecore
