@@ -61,11 +61,12 @@ __device__ __forceinline__ bool PlanePass(const PlaneGpu& p, float minx, float m
 
 // TraversalKernel is defined once in gpu_opt_engine.cu.
 // Declared here so gpu_context.cu can reference it via CUDA separable compilation.
-extern __global__ void TraversalKernel(int num_cameras, int num_nodes, int num_leafs, int root,
-                                       const NodePacked* __restrict__ nodes,
-                                       const LeafPacked* __restrict__ leafs,
-                                       const PlaneGpu* __restrict__ frustums,
-                                       DeviceStats* __restrict__ out);
+extern __global__ __launch_bounds__(kKernelMaxThreads, kKernelMinBlocksPerSM)
+void TraversalKernel(int num_cameras, int num_nodes, int num_leafs, int root,
+                     const NodePacked* __restrict__ nodes,
+                     const LeafPacked* __restrict__ leafs,
+                     const PlaneGpu* __restrict__ frustums,
+                     DeviceStats* __restrict__ out);
 
 }  // namespace gpu_kernel
 }  // namespace quakecore

@@ -58,7 +58,7 @@ struct GpuTraversalContext {
   // Stream for graph capture / launch.
   cudaStream_t stream{nullptr};
 
-  // Graph state (filled in Task 5).
+  // Graph state (lazy-captured on first GpuContextRun call).
   cudaGraphExec_t graph_exec{nullptr};
   bool graph_captured{false};
 };
