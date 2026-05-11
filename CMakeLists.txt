@@ -57,6 +57,7 @@ if(QUAKECORE_BUILD_GPU_OPT OR QUAKECORE_BUILD_BENCH)
     CUDA_STANDARD 17
     CUDA_STANDARD_REQUIRED ON
     CUDA_ARCHITECTURES 80
+    CUDA_SEPARABLE_COMPILATION ON
   )
   target_link_libraries(quakecore_gpu_engine PUBLIC quakecore_core quakecore_io CUDA::cudart)
 endif()
