@@ -162,9 +162,60 @@ GpuTraversalContext* GpuContextCreate(const BspData& bsp,
   return ctx;
 }
 
-TraversalStats GpuContextRun(GpuTraversalContext* /*ctx*/,
-                             const std::vector<Camera>& /*views_for_frame*/) {
-  throw std::runtime_error("GpuContextRun: not implemented yet");
+TraversalStats GpuContextRun(GpuTraversalContext* ctx,
+                             const std::vector<Camera>& views_for_frame) {
+  if (!ctx) {
+    throw std::runtime_error("GpuContextRun: null context");
+  }
+  if (static_cast<int>(views_for_frame.size()) != ctx->max_views_per_frame) {
+    throw std::runtime_error(
+        "GpuContextRun: views_for_frame.size() (" +
+        std::to_string(views_for_frame.size()) +
+        ") must equal max_views_per_frame (" +
+        std::to_string(ctx->max_views_per_frame) + ")");
+  }
+
+  // Build all max_views_per_frame * 6 frustum planes into the pinned host buffer.
+  // Order: views_for_frame[i].plane[j] -> h_frustums[i*6 + j].
+  for (int i = 0; i < ctx->max_views_per_frame; ++i) {
+    const Frustum f = BuildFrustum(views_for_frame[static_cast<std::size_t>(i)]);
+    for (int p = 0; p < 6; ++p) {
+      const auto& pl = f.planes[static_cast<std::size_t>(p)];
+      PlaneGpu& dst = ctx->h_frustums[static_cast<std::size_t>(i) * 6 + p];
+      dst.nx = pl.normal.x;
+      dst.ny = pl.normal.y;
+      dst.nz = pl.normal.z;
+      dst.dist = pl.dist;
+    }
+  }
+
+  auto* d_frustums = reinterpret_cast<PlaneGpu*>(ctx->d_buf + ctx->off_frus);
+  auto* d_stats = reinterpret_cast<DeviceStats*>(ctx->d_buf + ctx->off_stats);
+  auto* d_nodes = reinterpret_cast<NodePacked*>(ctx->d_buf + ctx->off_nodes);
+  auto* d_leafs = reinterpret_cast<LeafPacked*>(ctx->d_buf + ctx->off_leafs);
+
+  CheckCuda(cudaMemcpyAsync(d_frustums, ctx->h_frustums, ctx->bytes_frus,
+                            cudaMemcpyHostToDevice, ctx->stream),
+            "cudaMemcpyAsync frustums failed");
+  CheckCuda(cudaMemsetAsync(d_stats, 0, ctx->bytes_stats, ctx->stream),
+            "cudaMemsetAsync stats failed");
+
+  gpu_kernel::TraversalKernel<<<ctx->blocks, ctx->threads, 0, ctx->stream>>>(
+      ctx->max_views_per_frame, ctx->num_nodes, ctx->num_leafs, ctx->root,
+      d_nodes, d_leafs, d_frustums, d_stats);
+  CheckCuda(cudaPeekAtLastError(), "kernel launch failed");
+
+  CheckCuda(cudaMemcpyAsync(ctx->h_stats, d_stats, ctx->bytes_stats,
+                            cudaMemcpyDeviceToHost, ctx->stream),
+            "cudaMemcpyAsync stats D2H failed");
+  CheckCuda(cudaStreamSynchronize(ctx->stream), "cudaStreamSynchronize failed");
+
+  TraversalStats out{};
+  out.visited_nodes = ctx->h_stats->visited_nodes;
+  out.visited_leafs = ctx->h_stats->visited_leafs;
+  out.culled_nodes = ctx->h_stats->culled_nodes;
+  out.accepted_leafs = ctx->h_stats->accepted_leafs;
+  return out;
 }
 
 void GpuContextDestroy(GpuTraversalContext* ctx) {
