@@ -51,6 +51,7 @@ if(QUAKECORE_BUILD_GPU_OPT OR QUAKECORE_BUILD_BENCH)
   find_package(CUDAToolkit REQUIRED)
   add_library(quakecore_gpu_engine
     src/engines/gpu_opt_engine.cu
+    src/engines/gpu_context.cu
   )
   set_target_properties(quakecore_gpu_engine PROPERTIES
     CUDA_STANDARD 17
