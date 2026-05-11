@@ -194,20 +194,49 @@ TraversalStats GpuContextRun(GpuTraversalContext* ctx,
   auto* d_nodes = reinterpret_cast<NodePacked*>(ctx->d_buf + ctx->off_nodes);
   auto* d_leafs = reinterpret_cast<LeafPacked*>(ctx->d_buf + ctx->off_leafs);
 
-  CheckCuda(cudaMemcpyAsync(d_frustums, ctx->h_frustums, ctx->bytes_frus,
-                            cudaMemcpyHostToDevice, ctx->stream),
-            "cudaMemcpyAsync frustums failed");
-  CheckCuda(cudaMemsetAsync(d_stats, 0, ctx->bytes_stats, ctx->stream),
-            "cudaMemsetAsync stats failed");
+  if (!ctx->graph_captured) {
+    // Capture H2D + memset + kernel + D2H into a graph.
+    CheckCuda(cudaStreamBeginCapture(ctx->stream, cudaStreamCaptureModeThreadLocal),
+              "cudaStreamBeginCapture failed");
 
-  gpu_kernel::TraversalKernel<<<ctx->blocks, ctx->threads, 0, ctx->stream>>>(
-      ctx->max_views_per_frame, ctx->num_nodes, ctx->num_leafs, ctx->root,
-      d_nodes, d_leafs, d_frustums, d_stats);
-  CheckCuda(cudaPeekAtLastError(), "kernel launch failed");
+    cudaError_t inner_err = cudaSuccess;
+    auto record = [&](cudaError_t e) {
+      if (inner_err == cudaSuccess) inner_err = e;
+    };
+    record(cudaMemcpyAsync(d_frustums, ctx->h_frustums, ctx->bytes_frus,
+                           cudaMemcpyHostToDevice, ctx->stream));
+    record(cudaMemsetAsync(d_stats, 0, ctx->bytes_stats, ctx->stream));
+    gpu_kernel::TraversalKernel<<<ctx->blocks, ctx->threads, 0, ctx->stream>>>(
+        ctx->max_views_per_frame, ctx->num_nodes, ctx->num_leafs, ctx->root,
+        d_nodes, d_leafs, d_frustums, d_stats);
+    record(cudaPeekAtLastError());
+    record(cudaMemcpyAsync(ctx->h_stats, d_stats, ctx->bytes_stats,
+                           cudaMemcpyDeviceToHost, ctx->stream));
 
-  CheckCuda(cudaMemcpyAsync(ctx->h_stats, d_stats, ctx->bytes_stats,
-                            cudaMemcpyDeviceToHost, ctx->stream),
-            "cudaMemcpyAsync stats D2H failed");
+    cudaGraph_t graph = nullptr;
+    cudaError_t end_err = cudaStreamEndCapture(ctx->stream, &graph);
+    if (inner_err != cudaSuccess) {
+      if (graph) cudaGraphDestroy(graph);
+      throw std::runtime_error(std::string("graph capture body failed: ") +
+                               cudaGetErrorString(inner_err));
+    }
+    if (end_err != cudaSuccess) {
+      if (graph) cudaGraphDestroy(graph);
+      throw std::runtime_error(std::string("cudaStreamEndCapture failed: ") +
+                               cudaGetErrorString(end_err));
+    }
+
+    cudaError_t inst_err =
+        cudaGraphInstantiate(&ctx->graph_exec, graph, nullptr, nullptr, 0);
+    cudaGraphDestroy(graph);
+    if (inst_err != cudaSuccess) {
+      throw std::runtime_error(std::string("cudaGraphInstantiate failed: ") +
+                               cudaGetErrorString(inst_err));
+    }
+    ctx->graph_captured = true;
+  }
+
+  CheckCuda(cudaGraphLaunch(ctx->graph_exec, ctx->stream), "cudaGraphLaunch failed");
   CheckCuda(cudaStreamSynchronize(ctx->stream), "cudaStreamSynchronize failed");
 
   TraversalStats out{};
