@@ -127,13 +127,18 @@ void WriteCsv(const std::string& csv_path, const std::map<std::string, EngineRes
   if (!out) {
     throw std::runtime_error("Failed to open CSV output path: " + csv_path);
   }
-  out << "engine,frames,time_s,fps,visited_nodes,visited_leafs,culled_nodes,accepted_leafs\n";
+  out << "engine,frames,time_s,fps,visited_nodes,visited_leafs,culled_nodes,accepted_leafs,"
+         "first_frame_ms,steady_median_us,steady_p99_us\n";
   for (const auto& kv : results) {
     const auto& name = kv.first;
     const auto& r = kv.second;
     const double fps = static_cast<double>(frames) / r.seconds;
-    out << name << "," << frames << "," << r.seconds << "," << fps << "," << r.stats.visited_nodes << ","
-        << r.stats.visited_leafs << "," << r.stats.culled_nodes << "," << r.stats.accepted_leafs << "\n";
+    out << name << "," << frames << "," << r.seconds << "," << fps << ","
+        << r.stats.visited_nodes << "," << r.stats.visited_leafs << ","
+        << r.stats.culled_nodes << "," << r.stats.accepted_leafs << ",";
+    if (std::isnan(r.first_frame_ms)) out << ","; else out << r.first_frame_ms << ",";
+    if (std::isnan(r.steady_median_us)) out << ","; else out << r.steady_median_us << ",";
+    if (std::isnan(r.steady_p99_us)) out << "\n"; else out << r.steady_p99_us << "\n";
   }
 }
 
