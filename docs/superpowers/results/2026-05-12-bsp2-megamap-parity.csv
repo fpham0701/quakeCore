@@ -1,0 +1,4 @@
+engine,frames,time_s,fps,visited_nodes,visited_leafs,culled_nodes,accepted_leafs
+baseline,2000,0.00141773,1.4107e+06,3134,0,2567,0
+cpu_opt,2000,0.000621873,3.21609e+06,3134,0,2567,0
+gpu_opt,2000,0.168124,11896,3134,0,2567,0
