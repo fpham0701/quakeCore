@@ -21,16 +21,20 @@ struct Plane {
 
 struct BspNodeDisk {
   int32_t planenum{0};
-  int16_t children[2]{0, 0};  // <0 encodes leaf index as -(leaf+1)
-  int16_t mins[3]{0, 0, 0};
-  int16_t maxs[3]{0, 0, 0};
+  int32_t children[2]{0, 0};  // <0 encodes leaf index as -(leaf+1)
+  float   mins[3]{0.0F, 0.0F, 0.0F};
+  float   maxs[3]{0.0F, 0.0F, 0.0F};
+  int32_t firstface{0};
+  int32_t numfaces{0};
 };
 
 struct BspLeafDisk {
   int32_t contents{0};
   int32_t visofs{0};
-  int16_t mins[3]{0, 0, 0};
-  int16_t maxs[3]{0, 0, 0};
+  float   mins[3]{0.0F, 0.0F, 0.0F};
+  float   maxs[3]{0.0F, 0.0F, 0.0F};
+  int32_t firstmarksurface{0};
+  int32_t nummarksurfaces{0};
 };
 
 struct BspModel {
