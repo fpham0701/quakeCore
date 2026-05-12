@@ -1,0 +1,20 @@
+=== Acceptance #1: v29 regression on e1m1 ===
+Command: quakecore_bench --map /home/andrewmarous/quakeCore/examples/maps/fetched/quake_map_source-master/quake_map_source-master__bsp__e1m1.bsp --frames 2000 --seed 7
+Universal benchmark results
+map=/home/andrewmarous/quakeCore/examples/maps/fetched/quake_map_source-master/quake_map_source-master__bsp__e1m1.bsp frames=2000 seed=7
+baseline     time_s=0.001331   fps=1502596.863  speedup=1.000      visited_nodes=2000 accepted_leafs=0
+cpu_opt      time_s=0.001243   fps=1609628.152  speedup=1.071      visited_nodes=2000 accepted_leafs=0
+gpu_opt      time_s=0.161721   fps=12367.011    speedup=0.008      visited_nodes=2000 accepted_leafs=0
+correctness_cpu_opt=PASS
+correctness_gpu_opt=PASS
+
+=== Acceptance #2: BSP2 megamap ===
+Command: quakecore_bench --map /home/andrewmarous/quakeCore/examples/maps/fetched/megamap-bsp2/e3m6.bsp --frames 2000 --seed 7
+Universal benchmark results
+map=/home/andrewmarous/quakeCore/examples/maps/fetched/megamap-bsp2/e3m6.bsp frames=2000 seed=7
+baseline     time_s=0.001602   fps=1248165.976  speedup=1.000      visited_nodes=3134 accepted_leafs=0
+cpu_opt      time_s=0.001279   fps=1564038.378  speedup=1.253      visited_nodes=3134 accepted_leafs=0
+gpu_opt      time_s=0.159943   fps=12504.431    speedup=0.010      visited_nodes=3134 accepted_leafs=0
+correctness_cpu_opt=PASS
+correctness_gpu_opt=PASS
+
