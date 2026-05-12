@@ -284,25 +284,25 @@ TraversalStats RunGpuOptimizedTraversal(const BspData &bsp,
 
   for (int i = 0; i < num_nodes; ++i) {
     const auto &n = bsp.nodes[static_cast<size_t>(i)];
-    h_nodes[i].minx = static_cast<float>(n.mins[0]);
-    h_nodes[i].miny = static_cast<float>(n.mins[1]);
-    h_nodes[i].minz = static_cast<float>(n.mins[2]);
-    h_nodes[i].c0 = n.children[0];
-    h_nodes[i].maxx = static_cast<float>(n.maxs[0]);
-    h_nodes[i].maxy = static_cast<float>(n.maxs[1]);
-    h_nodes[i].maxz = static_cast<float>(n.maxs[2]);
-    h_nodes[i].c1 = n.children[1];
+    h_nodes[i].minx = n.mins[0];
+    h_nodes[i].miny = n.mins[1];
+    h_nodes[i].minz = n.mins[2];
+    h_nodes[i].c0   = n.children[0];
+    h_nodes[i].maxx = n.maxs[0];
+    h_nodes[i].maxy = n.maxs[1];
+    h_nodes[i].maxz = n.maxs[2];
+    h_nodes[i].c1   = n.children[1];
   }
 
   for (int i = 0; i < num_leafs; ++i) {
     const auto &l = bsp.leafs[static_cast<size_t>(i)];
-    h_leafs[i].minx = static_cast<float>(l.mins[0]);
-    h_leafs[i].miny = static_cast<float>(l.mins[1]);
-    h_leafs[i].minz = static_cast<float>(l.mins[2]);
+    h_leafs[i].minx = l.mins[0];
+    h_leafs[i].miny = l.mins[1];
+    h_leafs[i].minz = l.mins[2];
     h_leafs[i].pad0 = 0;
-    h_leafs[i].maxx = static_cast<float>(l.maxs[0]);
-    h_leafs[i].maxy = static_cast<float>(l.maxs[1]);
-    h_leafs[i].maxz = static_cast<float>(l.maxs[2]);
+    h_leafs[i].maxx = l.maxs[0];
+    h_leafs[i].maxy = l.maxs[1];
+    h_leafs[i].maxz = l.maxs[2];
     h_leafs[i].pad1 = 0;
   }
 
