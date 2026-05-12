@@ -1,0 +1,17 @@
+Path: /home/andrewmarous/quakeCore/examples/maps/fetched/megamap-bsp2/e3m6.bsp
+Size: 1089124 bytes
+Magic:    B   S   P   2
+
+Note: e3m6 is a Quake 1 episode 3 map (~4.7k BSP nodes), compiled to BSP2 via qbsp -bsp2.
+It is smaller than the design-spec 50k-node 'megamap' target — Quake 1 maps are inherently small.
+This file exercises the BSP2 code path end-to-end; a larger BSP2 megamap can be substituted later.
+
+Baseline (frames=10, seed=7):
+engine=baseline
+frames=10
+elapsed_s=1.1471e-05
+fps=871764
+visited_nodes=14
+visited_leafs=0
+culled_nodes=12
+accepted_leafs=0
