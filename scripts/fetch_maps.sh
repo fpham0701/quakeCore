@@ -48,6 +48,7 @@ Datasets:
   quake_map_source-master
   uquake1-master
   quake-local-source
+  megamap-bsp2
 EOF
       exit 0
       ;;
@@ -92,6 +93,7 @@ declare -a DATASETS=(
   "quake_map_source-master|https://codeload.github.com/fzwoch/quake_map_source/tar.gz/refs/heads/master|Quake map source package with free texture replacements"
   "uquake1-master|https://codeload.github.com/mikezila/uQuake1/tar.gz/refs/heads/master|Public-domain Quake BSP loading project with bundled sample BSPs"
   "quake-local-source|local://quake-source|Extract BSPs from local @Quake source tree (BSP/PAK scan)"
+  "megamap-bsp2|build://megamap|BSP2 megamap compiled via ericw-tools (or fallback download)"
 )
 
 echo "Fetching open Quake-derived map datasets into ${OUT_DIR}"
@@ -105,6 +107,19 @@ for entry in "${DATASETS[@]}"; do
   archive="${CACHE_DIR}/${name}.tar.gz"
   extract_dir="${CACHE_DIR}/${name}"
   dataset_out="${OUT_DIR}/${name}"
+
+  if [[ "${name}" == "megamap-bsp2" ]]; then
+    if "${ROOT_DIR}/scripts/maps/build_megamap.sh"; then
+      echo "-> megamap-bsp2 built via ericw-tools"
+    elif [[ -x "${ROOT_DIR}/scripts/maps/megamap_fallback.sh" ]]; then
+      echo "-> megamap-bsp2 build failed; trying fallback"
+      "${ROOT_DIR}/scripts/maps/megamap_fallback.sh"
+    else
+      echo "-> megamap-bsp2 build failed and no fallback configured"
+      continue
+    fi
+    continue
+  fi
 
   if [[ "${name}" == "quake-local-source" ]]; then
     if [[ ! -d "${QUAKE_SOURCE_DIR}" ]]; then
