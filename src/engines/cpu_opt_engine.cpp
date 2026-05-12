@@ -52,15 +52,16 @@ NodeSoA BuildNodeSoA(const BspData& bsp) {
   soa.maxz.resize(n);
   soa.child0.resize(n);
   soa.child1.resize(n);
-  // Copy the node data into the SoA vectors
+  // Copy the node data into the SoA vectors.
+  // node.mins/maxs are already float; node.children are int32.
   for (size_t i = 0; i < n; ++i) {
     const auto& node = bsp.nodes[i];
-    soa.minx[i] = static_cast<float>(node.mins[0]);
-    soa.miny[i] = static_cast<float>(node.mins[1]);
-    soa.minz[i] = static_cast<float>(node.mins[2]);
-    soa.maxx[i] = static_cast<float>(node.maxs[0]);
-    soa.maxy[i] = static_cast<float>(node.maxs[1]);
-    soa.maxz[i] = static_cast<float>(node.maxs[2]);
+    soa.minx[i]   = node.mins[0];
+    soa.miny[i]   = node.mins[1];
+    soa.minz[i]   = node.mins[2];
+    soa.maxx[i]   = node.maxs[0];
+    soa.maxy[i]   = node.maxs[1];
+    soa.maxz[i]   = node.maxs[2];
     soa.child0[i] = node.children[0];
     soa.child1[i] = node.children[1];
   }
@@ -73,12 +74,12 @@ NodeSoA BuildNodeSoA(const BspData& bsp) {
   soa.leaf_maxz.resize(nl);
   for (size_t i = 0; i < nl; ++i) {
     const auto& lf = bsp.leafs[i];
-    soa.leaf_minx[i] = static_cast<float>(lf.mins[0]);
-    soa.leaf_miny[i] = static_cast<float>(lf.mins[1]);
-    soa.leaf_minz[i] = static_cast<float>(lf.mins[2]);
-    soa.leaf_maxx[i] = static_cast<float>(lf.maxs[0]);
-    soa.leaf_maxy[i] = static_cast<float>(lf.maxs[1]);
-    soa.leaf_maxz[i] = static_cast<float>(lf.maxs[2]);
+    soa.leaf_minx[i] = lf.mins[0];
+    soa.leaf_miny[i] = lf.mins[1];
+    soa.leaf_minz[i] = lf.mins[2];
+    soa.leaf_maxx[i] = lf.maxs[0];
+    soa.leaf_maxy[i] = lf.maxs[1];
+    soa.leaf_maxz[i] = lf.maxs[2];
   }
   return soa;
 }
