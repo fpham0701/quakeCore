@@ -1,0 +1,7 @@
+Universal benchmark results
+map=/home/andrewmarous/quakeCore/examples/maps/fetched/quake_map_source-master/quake_map_source-master__bsp__e1m1.bsp frames=2000 seed=7
+baseline     time_s=0.001329   fps=1505440.285  speedup=1.000      visited_nodes=2000 accepted_leafs=0
+cpu_opt      time_s=0.000596   fps=3358054.209  speedup=2.231      visited_nodes=2000 accepted_leafs=0
+gpu_opt      time_s=0.161129   fps=12412.408    speedup=0.008      visited_nodes=2000 accepted_leafs=0
+correctness_cpu_opt=PASS
+correctness_gpu_opt=PASS
