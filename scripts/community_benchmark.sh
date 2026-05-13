@@ -39,7 +39,7 @@ done
 SWEEP_MAP=examples/maps/fetched/community-unforgiven/unf1.bsp
 if is_supported_bsp "$SWEEP_MAP"; then
 	sweep_name=$(basename "$SWEEP_MAP" .bsp)
-	for frames in 1000 2000 4000 8000 16000; do
+	for frames in 1000 2000 4000 8000 16000 32000 64000; do
 		./build/quakecore_bench --map "$SWEEP_MAP" --frames $frames --threads 16 \
 			--block-size 256 --seed 7 \
 			--csv $OUT/sweep_${sweep_name}_f${frames}.csv 2>&1 | tee -a $OUT/sweep.log
