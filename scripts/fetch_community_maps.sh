@@ -15,7 +15,7 @@ for p in honey unforgiven mapjam6 func_mapjam9; do
 		-o examples/maps/.cache/community_packs/${p}.zip \
 		https://www.quaddicted.com/filebase/${p}.zip
 	mkdir -p examples/maps/fetched/community-${p}
-	unzip -j -o examples/maps/.cache/community_packs/${p}.zip 'maps/*.bsp' \
+	unzip -j -o examples/maps/.cache/community_packs/${p}.zip '*maps/*.bsp' \
 		-d examples/maps/fetched/community-${p}/
 done
 
