@@ -130,3 +130,10 @@ Use any `.bsp` path (for example one under `examples/maps/fetched/...`).
 - GPU targets require CUDA at configure/build time.
 - The benchmark path is intended for cross-engine comparison and regression checks.
 - This project focuses on traversal/culling benchmarking, not full Quake rendering/gameplay.
+
+## Live Co-Traversal (Ironwail sidecar)
+
+See `docs/superpowers/specs/2026-05-12-live-quake-cotraversal-design.md` for design,
+`scripts/build_ironwail_with_probe.sh` to build the patched game, and
+`scripts/perlmutter_live.md` for remote sidecar deployment. Build with
+`-DQUAKECORE_BUILD_LIVE=ON`.
