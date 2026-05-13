@@ -35,15 +35,16 @@ for f in examples/maps/fetched/community-*/*.bsp; do
 		--csv $OUT/${pack}_${name}.csv 2>&1 | tee -a $OUT/bench.log
 done
 
-# heavier stress test
-for f in examples/maps/fetched/community-unforgiven/{unf1,unf2,unf3}.bsp \
-	examples/maps/fetched/community-honey/start.bsp; do
-	is_supported_bsp "$f" || continue
-	name=$(basename "$f" .bsp)
-	./build/quakecore_bench --map "$f" --frames 10000 --threads 16 \
-		--block-size 256 --seed 7 \
-		--csv $OUT/heavy_${name}_f10000.csv 2>&1 | tee -a $OUT/heavy.log
-done
+# frame-size sweep on a single large map
+SWEEP_MAP=examples/maps/fetched/community-unforgiven/unf1.bsp
+if is_supported_bsp "$SWEEP_MAP"; then
+	sweep_name=$(basename "$SWEEP_MAP" .bsp)
+	for frames in 1000 2000 4000 8000 16000; do
+		./build/quakecore_bench --map "$SWEEP_MAP" --frames $frames --threads 16 \
+			--block-size 256 --seed 7 \
+			--csv $OUT/sweep_${sweep_name}_f${frames}.csv 2>&1 | tee -a $OUT/sweep.log
+	done
+fi
 
 # parity bug check for unf3
 for seed in 7 23; do
