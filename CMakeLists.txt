@@ -108,4 +108,9 @@ if(QUAKECORE_BUILD_LIVE)
     ${CMAKE_CURRENT_SOURCE_DIR}/include
   )
   target_link_libraries(quakecore_frame_protocol PUBLIC rt pthread)
+
+  enable_testing()
+  add_executable(test_protocol tests/live/test_protocol.c)
+  target_link_libraries(test_protocol PRIVATE quakecore_frame_protocol)
+  add_test(NAME live_protocol COMMAND test_protocol)
 endif()
