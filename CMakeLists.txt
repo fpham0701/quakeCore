@@ -87,3 +87,25 @@ if(QUAKECORE_BUILD_BENCH)
   add_executable(quakecore_bench src/apps/bench_main.cpp)
   target_link_libraries(quakecore_bench PRIVATE quakecore_baseline_engine quakecore_cpu_engine quakecore_gpu_engine quakecore_core quakecore_io)
 endif()
+
+option(QUAKECORE_BUILD_LIVE "Build live co-traversal sidecar + protocol lib" OFF)
+
+if(QUAKECORE_BUILD_LIVE)
+  enable_language(C)
+  add_library(quakecore_frame_protocol STATIC
+    src/live/protocol.c
+    src/live/sha256.c
+    src/live/transport_common.c
+    src/live/transport_shm.c
+    src/live/transport_tcp.c
+  )
+  set_target_properties(quakecore_frame_protocol PROPERTIES
+    C_STANDARD 99
+    C_STANDARD_REQUIRED ON
+    POSITION_INDEPENDENT_CODE ON
+  )
+  target_include_directories(quakecore_frame_protocol PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+  )
+  target_link_libraries(quakecore_frame_protocol PUBLIC rt pthread)
+endif()
