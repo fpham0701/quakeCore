@@ -243,7 +243,8 @@ __global__ __launch_bounds__(
 // host caller for traversal kernel
 TraversalStats RunGpuOptimizedTraversal(const BspData &bsp,
                                         const std::vector<Camera> &cameras,
-                                        const int block_size) {
+                                        const int block_size,
+                                        const Frustum* override_frustum) {
   if (bsp.models.empty()) {
     throw std::runtime_error("BSP has no model data");
   }
@@ -307,7 +308,7 @@ TraversalStats RunGpuOptimizedTraversal(const BspData &bsp,
   }
 
   for (int i = 0; i < num_cameras; ++i) {
-    const Frustum f = BuildFrustum(cameras[static_cast<size_t>(i)]);
+    const Frustum f = override_frustum ? *override_frustum : BuildFrustum(cameras[static_cast<size_t>(i)]);
     for (int p = 0; p < 6; ++p) {
       const auto &pl = f.planes[static_cast<size_t>(p)];
       h_frustums[static_cast<size_t>(i) * 6 + p].nx = pl.normal.x;

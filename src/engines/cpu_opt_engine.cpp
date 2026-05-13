@@ -151,9 +151,10 @@ inline bool AabbInFrustumScalar(const Frustum& fr,
   return true;
 }
 
-TraversalStats TraverseCamera(const BspData& bsp, const NodeSoA& soa, const Camera& cam) {
+TraversalStats TraverseCamera(const BspData& bsp, const NodeSoA& soa, const Camera& cam,
+                              const Frustum* override_frustum) {
   TraversalStats stats{};
-  const Frustum fr_raw = BuildFrustum(cam);
+  const Frustum fr_raw = override_frustum ? *override_frustum : BuildFrustum(cam);
 
   const int32_t node_count = static_cast<int32_t>(soa.child0.size());
   const int32_t leaf_count = static_cast<int32_t>(soa.leaf_minx.size());
@@ -249,7 +250,8 @@ TraversalStats TraverseCamera(const BspData& bsp, const NodeSoA& soa, const Came
 
 }  // namespace
 
-TraversalStats RunCpuOptimizedTraversal(const BspData& bsp, const std::vector<Camera>& cameras, const int threads) {
+TraversalStats RunCpuOptimizedTraversal(const BspData& bsp, const std::vector<Camera>& cameras, const int threads,
+                                        const Frustum* override_frustum) {
   if (bsp.models.empty()) {
     throw std::runtime_error("BSP has no model data");
   }
@@ -274,7 +276,7 @@ TraversalStats RunCpuOptimizedTraversal(const BspData& bsp, const std::vector<Ca
 
 #pragma omp for schedule(dynamic, 8) nowait
       for (size_t i = 0; i < cameras.size(); ++i) {
-        const auto s = TraverseCamera(bsp, soa, cameras[i]);
+        const auto s = TraverseCamera(bsp, soa, cameras[i], override_frustum);
         visited_nodes  += s.visited_nodes;
         visited_leafs  += s.visited_leafs;
         culled_nodes   += s.culled_nodes;
@@ -289,7 +291,7 @@ TraversalStats RunCpuOptimizedTraversal(const BspData& bsp, const std::vector<Ca
   (void)threads;
   const NodeSoA soa = BuildNodeSoA(bsp);
   for (const auto& cam : cameras) {
-    const auto s = TraverseCamera(bsp, soa, cam);
+    const auto s = TraverseCamera(bsp, soa, cam, override_frustum);
     total.visited_nodes  += s.visited_nodes;
     total.visited_leafs  += s.visited_leafs;
     total.culled_nodes   += s.culled_nodes;

@@ -41,14 +41,15 @@ void TraverseRecursive(const BspData& bsp, const Frustum& frustum, int node_inde
 
 }  // namespace
 
-TraversalStats RunBaselineTraversal(const BspData& bsp, const std::vector<Camera>& cameras) {
+TraversalStats RunBaselineTraversal(const BspData& bsp, const std::vector<Camera>& cameras,
+                                    const Frustum* override_frustum) {
   if (bsp.models.empty()) {
     throw std::runtime_error("BSP has no model data");
   }
   TraversalStats total{};
   const int root = bsp.models.front().headnode[0];
   for (const auto& cam : cameras) {
-    const Frustum fr = BuildFrustum(cam);
+    const Frustum fr = override_frustum ? *override_frustum : BuildFrustum(cam);
     TraverseRecursive(bsp, fr, root, total);
   }
   return total;
