@@ -1,4 +1,5 @@
 #include "quakecore_live/frame_protocol.h"
+#include "../../src/live/transport_internal.h"
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
@@ -25,5 +26,18 @@ int main(void) {
     return 1;
   }
   printf("sha256 ok\n");
+
+  {
+    QcfpSpec s;
+    assert(qcfp_parse_spec("shm:foo", &s) == 0);
+    assert(s.kind == QCFP_SPEC_SHM && strcmp(s.shm_name, "foo") == 0);
+    assert(qcfp_parse_spec("tcp:1.2.3.4:5000", &s) == 0);
+    assert(s.kind == QCFP_SPEC_TCP_CONNECT && strcmp(s.host, "1.2.3.4") == 0 && s.port == 5000);
+    assert(qcfp_parse_spec("tcp-listen:5000", &s) == 0);
+    assert(s.kind == QCFP_SPEC_TCP_LISTEN && s.port == 5000);
+    assert(qcfp_parse_spec("bogus", &s) != 0);
+    printf("spec parser ok\n");
+  }
+
   return 0;
 }
