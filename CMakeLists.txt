@@ -130,4 +130,16 @@ if(QUAKECORE_BUILD_LIVE)
     quakecore_frame_protocol
     quakecore_baseline_engine quakecore_cpu_engine quakecore_gpu_engine
     quakecore_core quakecore_io)
+
+  add_executable(fake_game src/live/fake_game.cpp)
+  set_target_properties(fake_game PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+  target_link_libraries(fake_game PRIVATE quakecore_frame_protocol quakecore_core quakecore_io)
+
+  add_executable(test_fake_game_parity tests/live/test_fake_game_parity.cpp)
+  set_target_properties(test_fake_game_parity PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+  target_link_libraries(test_fake_game_parity PRIVATE quakecore_frame_protocol)
+  # NOTE: path is absolute for v1; will be made relative when maps land in CI
+  add_test(NAME live_fake_game_parity
+           COMMAND test_fake_game_parity /home/andrewmarous/quakeCore/examples/maps/fetched/community-func_mapjam9/jam9_breezeep.bsp
+           WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 endif()
