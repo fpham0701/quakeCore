@@ -117,4 +117,17 @@ if(QUAKECORE_BUILD_LIVE)
   add_executable(test_shm_ring tests/live/test_shm_ring.c)
   target_link_libraries(test_shm_ring PRIVATE quakecore_frame_protocol)
   add_test(NAME live_shm_ring COMMAND test_shm_ring)
+
+  if(NOT QUAKECORE_BUILD_BENCH)
+    message(FATAL_ERROR "QUAKECORE_BUILD_LIVE=ON requires QUAKECORE_BUILD_BENCH=ON (engines)")
+  endif()
+  add_executable(quakecore_live
+    src/live/sidecar_main.cpp
+    src/live/frame_runner.cpp
+  )
+  set_target_properties(quakecore_live PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+  target_link_libraries(quakecore_live PRIVATE
+    quakecore_frame_protocol
+    quakecore_baseline_engine quakecore_cpu_engine quakecore_gpu_engine
+    quakecore_core quakecore_io)
 endif()
