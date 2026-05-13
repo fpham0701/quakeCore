@@ -1,0 +1,62 @@
+# 0001-frame-probe.patch — applies on the pinned Ironwail commit.
+#
+# Integrator: line numbers are placeholders. Open each target file in the patched
+# source tree and adjust the @@ ranges so `git apply --check` succeeds.
+#
+# Touches:
+#   Quake/host.c       — parse --qcfp-transport / --qcfp-handshake-once from com_argv;
+#                         FrameProbe_Init after Host_FilterTime + map load;
+#                         FrameProbe_Shutdown from Host_Shutdown.
+#   Quake/gl_rmain.c   — wrap the cull loop with FrameProbe_BeginCull /
+#                         FrameProbe_EndCull(visited, accepted) / FrameProbe_Emit()
+#                         immediately before R_DrawWorld.
+#   Quake/Makefile     — add frame_probe/frame_probe.c to OBJS,
+#                         add -I$(QUAKECORE_DIR)/include,
+#                         link -lquakecore_frame_protocol -lrt -lpthread.
+
+diff --git a/Quake/host.c b/Quake/host.c
+--- a/Quake/host.c
++++ b/Quake/host.c
+@@ -1,1 +1,3 @@
++#include "frame_probe/frame_probe.h"
++
+ /* …existing host.c top-level… */
+@@ -1,1 +1,12 @@
+ /* In Host_Init() (after Host_InitCommands and com_argv is populated): */
++    {
++        const char* transport = NULL;
++        int handshake_once = 0;
++        for (int i = 1; i < com_argc; ++i) {
++            if (!strcmp(com_argv[i], "--qcfp-transport") && i + 1 < com_argc) transport = com_argv[++i];
++            else if (!strcmp(com_argv[i], "--qcfp-handshake-once")) handshake_once = 1;
++        }
++        if (transport) FrameProbe_Init(transport, handshake_once);
++    }
+@@ -1,1 +1,1 @@
+ /* In Host_Shutdown(): */
++    FrameProbe_Shutdown();
+
+diff --git a/Quake/gl_rmain.c b/Quake/gl_rmain.c
+--- a/Quake/gl_rmain.c
++++ b/Quake/gl_rmain.c
+@@ -1,1 +1,3 @@
++#include "frame_probe/frame_probe.h"
++
+ /* …existing top of gl_rmain.c… */
+@@ -1,1 +1,5 @@
+ /* Around the world cull loop, immediately before R_DrawWorld(): */
++    FrameProbe_BeginCull();
+     /* …existing R_MarkSurfaces / R_RecursiveWorldNode cull pass… */
++    FrameProbe_EndCull(/*visited_nodes=*/r_visframecount /*adjust to actual counter*/, /*accepted_leafs=*/r_visiblesurfaces /*adjust*/);
++    FrameProbe_Emit();
+     R_DrawWorld();
+
+diff --git a/Quake/Makefile b/Quake/Makefile
+--- a/Quake/Makefile
++++ b/Quake/Makefile
+@@ -1,1 +1,4 @@
+-OBJS = ... existing ...
++OBJS = ... existing ... \
++       frame_probe/frame_probe.o
++CFLAGS  += -I$(QUAKECORE_DIR)/include
++LDLIBS  += -L$(QUAKECORE_DIR)/build -lquakecore_frame_protocol -lrt -lpthread
