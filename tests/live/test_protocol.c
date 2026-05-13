@@ -3,6 +3,8 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 static void hex(const uint8_t* in, size_t n, char* out) {
   static const char* H = "0123456789abcdef";
@@ -37,6 +39,33 @@ int main(void) {
     assert(s.kind == QCFP_SPEC_TCP_LISTEN && s.port == 5000);
     assert(qcfp_parse_spec("bogus", &s) != 0);
     printf("spec parser ok\n");
+  }
+
+  {
+  /* Fork: child = producer, parent = consumer. */
+  pid_t pid = fork();
+  if (pid == 0) {
+    /* child: connect after small delay */
+    usleep(200 * 1000);
+    QcfpTransport* prod = qcfp_open_producer("tcp:127.0.0.1:23456");
+    if (!prod) _exit(2);
+    QcfpFramePacket pkt; memset(&pkt, 0, sizeof pkt);
+    pkt.hdr.magic = QCFP_MAGIC; pkt.hdr.version = QCFP_VERSION;
+    pkt.hdr.type = QCFP_TYPE_FRAME; pkt.hdr.length = sizeof pkt - sizeof pkt.hdr;
+    pkt.frame_id = 42;
+    QcfpStatus s = qcfp_send(prod, &pkt, sizeof pkt);
+    qcfp_close(prod);
+    _exit(s == QCFP_OK ? 0 : 3);
+  }
+  QcfpTransport* cons = qcfp_open_consumer("tcp-listen:23456");
+  assert(cons);
+  QcfpFramePacket got; size_t bytes = 0;
+  QcfpStatus s = qcfp_recv(cons, &got, sizeof got, &bytes);
+  assert(s == QCFP_OK && bytes == sizeof got);
+  assert(got.frame_id == 42);
+  int status; waitpid(pid, &status, 0); assert(WEXITSTATUS(status) == 0);
+  qcfp_close(cons);
+  printf("tcp roundtrip ok\n");
   }
 
   return 0;
